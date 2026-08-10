@@ -1,48 +1,79 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { registrarEstudiante } from "../api/estudiantes.js";
 
 export default function RegistroEstudiante() {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        nombre: "",
+        edad: "",
+        correo: ""
+    });
+    const [guardando, setGuardando] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setGuardando(true);
+        try {
+            await registrarEstudiante({
+                ...formData,
+                edad: Number(formData.edad)
+            });
+            navigate("/"); // Redirige a la lista tras guardar
+        } catch (error) {
+            console.error("Error al registrar estudiante:", error);
+            setGuardando(false);
+        }
+    };
+
     return (
         <section className="pagina">
-            <section className="contenido contenido--angosto">        
-                <h1 className="titulo">Registrar Nuevo Estudiante</h1>
-                <p className="subtitulo">Completa la información para dar de alta al estudiante.</p>
-        
-                <form className="tarjeta-formulario">
-                    <div className="seccion">
-                        <span className="seccion__icono" aria-hidden="true">🧑‍🎓</span>
-                        <h2 className="seccion__titulo">Datos del Estudiante</h2>
-                    </div>
-                    <hr className="separador" />
-        
+            <section className="contenido">
+                <h1 className="titulo">Registrar Estudiante</h1>
+                <form onSubmit={handleSubmit} className="tarjeta">
                     <div className="campo">
-                        <label htmlFor="nombre" className="etiqueta">Nombre Completo <span className="requerido">*</span></label>
-                        <input id="nombre" type="text" className="entrada" placeholder="Ej. Juan Pérez" />
-                        <span className="ayuda">Ingresa el nombre tal como figura en el documento oficial.</span>
+                        <label>Nombre:</label>
+                        <input 
+                            type="text" 
+                            name="nombre" 
+                            value={formData.nombre} 
+                            onChange={handleChange} 
+                            required 
+                        />
                     </div>
-        
-                    <div className="fila">
-                        <div className="campo">
-                            <label htmlFor="edad" className="etiqueta">Edad <span className="requerido">*</span></label>
-                            <input id="edad" type="number" className="entrada" placeholder="00" />
-                        </div>
-            
-                        <div className="campo">
-                            <label htmlFor="correo" className="etiqueta">
-                                Correo Electrónico <span className="requerido">*</span>
-                            </label>
-                            <input id="correo" type="email" className="entrada" placeholder="estudiante@ejemplo.com" />
-                        </div>
+                    <div className="campo">
+                        <label>Edad:</label>
+                        <input 
+                            type="number" 
+                            name="edad" 
+                            value={formData.edad} 
+                            onChange={handleChange} 
+                            required 
+                        />
                     </div>
-            
-                    <hr className="separador" />
-        
-                    <div className="acciones">
-                        <button type="submit" className="boton boton--primario">
-                            <span aria-hidden="true">💾</span> Guardar Estudiante
-                        </button>
-                        <button type="button" className="boton boton--secundario">Cancelar</button>
+                    <div className="campo">
+                        <label>Correo:</label>
+                        <input 
+                            type="email" 
+                            name="correo" 
+                            value={formData.correo} 
+                            onChange={handleChange} 
+                            required 
+                        />
                     </div>
+                    <button type="submit" className="boton boton--primario" disabled={guardando}>
+                        {guardando ? "Guardando..." : "Guardar Estudiante"}
+                    </button>
+                    <Link to="/" className="boton">Cancelar</Link>
                 </form>
             </section>
         </section>
-    )
+    );
 }
